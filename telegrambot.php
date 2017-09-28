@@ -5,6 +5,10 @@ if (!defined("IN_MYBB")) {
     die("Direct initialization of this file is not allowed.");
 }
 
+require "telegrambot/Logger.php";
+
+$plugins->add_hook("member_do_register_end", "handleNewUser", "5");
+$plugins->add_hook("datahandler_post_insert_post_end", "handleNewPost", "5");
 
 function telegrambot_info() {
     return array("name" => "MyBB Telegram Bot", "description" => "MyBB Telegram Bot für h4w-rpg.de", "website" => "https://implex1v.de", "author" => "Implex1v", "authorsite" => "https://implex1v.de", "version" => "1.0", "guid" => "", "codename" => str_replace('.php',
@@ -61,4 +65,32 @@ function getRandomString($length) {
     }
 
     return $randomString;
+}
+
+function handleNewUser($data) {
+    global $logger;
+
+    $logger->log("handleNewUser() " . print_r($data, true));
+}
+
+function handleNewPost($data) {
+    $post_payload = http_build_query(
+        array(
+            "pid" => $data->pid
+        )
+    );
+
+    $opts = array('http' =>
+        array(
+            'method'  => 'POST',
+            'header'  => 'Content-type: application/x-www-form-urlencoded',
+            'content' => $post_payload
+        )
+    );
+
+    $context = stream_context_create($opts);
+    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=poll", false, $context);
+
+    $logger = new Logger("telegrambot.php");
+    $logger->log("handleNewPost() Return value for pid ".$data->pid. " is ".$result);
 }
