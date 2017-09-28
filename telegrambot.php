@@ -9,6 +9,7 @@ require "telegrambot/Logger.php";
 
 $plugins->add_hook("member_do_register_end", "handleNewUser", "5");
 $plugins->add_hook("datahandler_post_insert_post_end", "handleNewPost", "5");
+$plugins->add_hook("datahandler_pm_insert_end","handleNewPrivateMessage", "5");
 
 function telegrambot_info() {
     return array("name" => "MyBB Telegram Bot", "description" => "MyBB Telegram Bot für h4w-rpg.de", "website" => "https://implex1v.de", "author" => "Implex1v", "authorsite" => "https://implex1v.de", "version" => "1.0", "guid" => "", "codename" => str_replace('.php',
@@ -90,8 +91,30 @@ function handleNewPost($data) {
     );
 
     $context = stream_context_create($opts);
-    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=poll", false, $context);
+    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=pollPosts", false, $context);
 
     $logger = new Logger("telegrambot.php");
     $logger->log("handleNewPost() Return value for pid ".$data->pid. " is ".$result);
+}
+
+function handleNewPrivateMessage($data) {
+    $post_payload = http_build_query(
+        array(
+            "pmid" => $data->pmid
+        )
+    );
+
+    $opts = array('http' =>
+        array(
+            'method'  => 'POST',
+            'header'  => 'Content-type: application/x-www-form-urlencoded',
+            'content' => $post_payload
+        )
+    );
+
+    $context = stream_context_create($opts);
+    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=pollPrivateMessage", false, $context);
+
+    $logger = new Logger("telegrambot.php");
+    $logger->log("handleNewPrivateMessage() Return value for pmid ".$data->pmid. " is ".$result);
 }
