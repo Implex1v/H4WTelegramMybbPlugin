@@ -18,7 +18,7 @@ function telegrambot_info() {
 function telegrambot_install() {
     global $db;
 
-    $db->query("CREATE TABLE mybb_telegrambot_user (id INT PRIMARY KEY AUTO_INCREMENT, user_id INT, token VARCHAR(255), active TINYINT);");
+    $db->query("CREATE TABLE mybb_telegrambot_user (id INT PRIMARY KEY AUTO_INCREMENT, user_id INT, telegram_id INT, token VARCHAR(255), active TINYINT);");
 }
 
 function telegrambot_is_installed() {
@@ -42,7 +42,8 @@ function telegrambot_activate() {
         $data = array(
             "user_id" => $row['uid'],
             "token" => getRandomString(50),
-            "active" => "0"
+            "telegram_id" => 0,
+            "active" => 0
         );
 
         $db->insert_query("telegrambot_user", $data);
