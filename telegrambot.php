@@ -1,15 +1,17 @@
 <?php
-
+ini_set('display_errors', 1);
 // Disallow direct access to this file for security reasons
 if (!defined("IN_MYBB")) {
     die("Direct initialization of this file is not allowed.");
 }
 
 require "telegrambot/Logger.php";
+require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 
 $plugins->add_hook("member_do_register_end", "handleNewUser", "5");
 $plugins->add_hook("datahandler_post_insert_post_end", "handleNewPost", "5");
 $plugins->add_hook("datahandler_pm_insert_end","handleNewPrivateMessage", "5");
+$plugins->add_hook("global_start","handleUserCPMenu","");
 
 function telegrambot_info() {
     return array("name" => "MyBB Telegram Bot", "description" => "MyBB Telegram Bot für h4w-rpg.de", "website" => "https://implex1v.de", "author" => "Implex1v", "authorsite" => "https://implex1v.de", "version" => "1.0", "guid" => "", "codename" => str_replace('.php',
@@ -49,12 +51,18 @@ function telegrambot_activate() {
 
         $db->insert_query("telegrambot_user", $data);
     }
+
+    find_replace_templatesets("usercp_nav", '#' . preg_quote('{$usercpmenu}') . '#', "{\$usercpmenu}\n\t{\$telegramBotSettings}");
+
+    tgBotLoadTemplates();
 }
 
 function telegrambot_deactivate() {
     global $db;
 
+    $db->delete_query("templates", "title = 'usercp_nav_telegrambot'");
     $db->delete_query("telegrambot_user");
+    find_replace_templatesets("usercp_nav", '#' . preg_quote('{$telegramBotSettings}') . '#', "");
 }
 
 function getRandomString($length) {
@@ -117,4 +125,26 @@ function handleNewPrivateMessage($data) {
 
     $logger = new Logger("telegrambot.php");
     $logger->log("handleNewPrivateMessage() Return value for pmid ".$data->pmid. " is ".$result);
+}
+
+function tgBotLoadTemplates() {
+    require __DIR__ . "/telegrambot/TemplateLoader.php";
+    global $db;
+    $laoder = new TemplateLoader();
+
+    $template = $laoder->load("usercp_nav_telegrambot");
+    $data = array(
+        "title" => "usercp_nav_telegrambot",
+        "template" => $db->escape_string($template),
+        "sid" => -1,
+        "version" => "",
+        "dateline" => time()
+    );
+    $db->insert_query("templates", $data);
+}
+
+function handleUserCPMenu() {
+    global $templates, $telegramBotSettings;
+    $telegramBotSettings = eval($templates->render('usercp_nav_telegrambot'));
+    //file_put_contents("benis.log", $telegramBotSettings, FILE_APPEND);
 }
