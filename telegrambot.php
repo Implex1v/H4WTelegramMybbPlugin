@@ -19,7 +19,7 @@ function telegrambot_info() {
 function telegrambot_install() {
     global $db;
 
-    $db->query("CREATE TABLE mybb_telegrambot_user (id INT PRIMARY KEY AUTO_INCREMENT, user_id INT, telegram_id INT, token VARCHAR(255), active TINYINT);");
+    $db->query("CREATE TABLE mybb_telegrambot_user (id INT PRIMARY KEY AUTO_INCREMENT, user_id INT, telegram_id INT, token VARCHAR(255), active TINYINT, show_pm TINYINT DEFAULT 1, show_all_posts TINYINT DEFAULT 0);");
 }
 
 function telegrambot_is_installed() {
@@ -100,7 +100,7 @@ function handleNewPost($data) {
 function handleNewPrivateMessage($data) {
     $post_payload = http_build_query(
         array(
-            "pmid" => $data->pmid
+            "pmid" => $data->pmid[0]
         )
     );
 
