@@ -8,7 +8,7 @@
 <tbody style="display: table-row-group;">
     <tr>
         <td class="trow1 smalltext">
-            <a href="telegrambot.php?action=settings" class="usercp_nav_item usercp_nav_composepm">Einstellungen</a>
+            <a href="telegrambot.php" class="usercp_nav_item usercp_nav_composepm">Einstellungen</a>
         </td>
     </tr>
 </tbody>

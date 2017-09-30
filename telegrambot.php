@@ -53,16 +53,21 @@ function telegrambot_activate() {
     }
 
     find_replace_templatesets("usercp_nav", '#' . preg_quote('{$usercpmenu}') . '#', "{\$usercpmenu}\n\t{\$telegramBotSettings}");
-
     tgBotLoadTemplates();
+
+    copy(__DIR__ . "/telegrambot/telegrambot.php", __DIR__ . "/../../telegrambot.php");
 }
 
 function telegrambot_deactivate() {
     global $db;
 
     $db->delete_query("templates", "title = 'usercp_nav_telegrambot'");
+    $db->delete_query("templates", "title = 'telegramcp'");
+    $db->delete_query("templates", "title = 'telegramcp_warning'");
     $db->delete_query("telegrambot_user");
     find_replace_templatesets("usercp_nav", '#' . preg_quote('{$telegramBotSettings}') . '#', "");
+
+    unlink(__DIR__ . "/../../telegrambot.php");
 }
 
 function getRandomString($length) {
@@ -140,6 +145,16 @@ function tgBotLoadTemplates() {
         "version" => "",
         "dateline" => time()
     );
+    $db->insert_query("templates", $data);
+
+    $template = $laoder->load("telegramcp");
+    $data['title'] = "telegramcp";
+    $data['template'] = $db->escape_string($template);
+    $db->insert_query("templates", $data);
+
+    $template = $laoder->load("telegramcp_warning");
+    $data['title'] = "telegramcp_warning";
+    $data['template'] = $db->escape_string($template);
     $db->insert_query("templates", $data);
 }
 
