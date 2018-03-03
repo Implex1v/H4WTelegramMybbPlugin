@@ -8,7 +8,7 @@ if (!defined("IN_MYBB")) {
 require "telegrambot/Logger.php";
 require_once MYBB_ROOT."/inc/adminfunctions_templates.php";
 
-$plugins->add_hook("member_do_register_end", "handleNewUser", "5");
+//$plugins->add_hook("member_do_register_end", "handleNewUser", "5");
 $plugins->add_hook("datahandler_post_insert_post_end", "handleNewPost", "5");
 $plugins->add_hook("datahandler_pm_insert_end","handleNewPrivateMessage", "5");
 $plugins->add_hook("global_start","handleUserCPMenu","");
@@ -104,13 +104,14 @@ function handleNewPost($data) {
     );
 
     $context = stream_context_create($opts);
-    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=pollPosts", false, $context);
+    $result = file_get_contents("https://h4w-rpg.de/tg/h4wbot.php?action=pollPosts", false, $context);
 
     $logger = new Logger("telegrambot.php");
     $logger->log("handleNewPost() Return value for pid ".$data->pid. " is ".$result);
 }
 
 function handleNewPrivateMessage($data) {
+    echo "Called new private message";
     $post_payload = http_build_query(
         array(
             "pmid" => $data->pmid[0]
@@ -126,16 +127,16 @@ function handleNewPrivateMessage($data) {
     );
 
     $context = stream_context_create($opts);
-    $result = file_get_contents("https://api.implex1v.de/h4wbot.php?action=pollPrivateMessage", false, $context);
+    $result = file_get_contents("https://h4w-rpg.de/tg/h4wbot.php?action=pollPrivateMessage", false, $context);
 
     $logger = new Logger("telegrambot.php");
     $logger->log("handleNewPrivateMessage() Return value for pmid ".$data->pmid. " is ".$result);
 }
 
 function tgBotLoadTemplates() {
-    require __DIR__ . "/telegrambot/TemplateLoader.php";
+    require __DIR__ . "/telegrambot/TGTemplateLoader.php";
     global $db;
-    $laoder = new TemplateLoader();
+    $laoder = new TGTemplateLoader();
 
     $template = $laoder->load("usercp_nav_telegrambot");
     $data = array(

@@ -10,6 +10,26 @@ add_breadcrumb('Telegram Bot Einstellungen', "telegrambot.php");
 
 usercp_menu();
 
+if($mybb->user['uid'] == 0) {
+    echo "<h1>Kein Zugriff für Gäste</h1>";
+    exit();
+}
+
+// check if current user has already a telegram bot entry. If no create one
+$ueResult = $db->query("SELECT count(*) c FROM mybb_telegrambot_user WHERE user_id = ".$mybb->user['uid']);
+if($ueResult AND $row = $ueResult->fetch_array()) {
+    if($row['c'] == 0) {
+        $data = array(
+            "user_id" => $mybb->user['uid'],
+            "token" => getRandomString(50),
+            "telegram_id" => 0,
+            "active" => 0
+        );
+
+        $db->insert_query("telegrambot_user", $data);
+    }
+}
+
 // Save data to database if the user has send the form
 if($mybb->get_input('action') == "save") {
     $data = array(

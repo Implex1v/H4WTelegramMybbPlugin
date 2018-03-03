@@ -3,7 +3,7 @@
 /**
  * Class TemplateLoader for loading a template file into a string which will be inserted into the mybb_templates table
  */
-class TemplateLoader {
+class TGTemplateLoader {
     private $extension = ".tpl";
     private $templateDir;
 
